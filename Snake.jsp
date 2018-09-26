@@ -29,6 +29,7 @@
 		private int idle;
 		private ArrayList<Integer> segmentdir;
 		private int[] endsegment;
+		private Image img;
 
 		public Snake_v001() {
 			idle = 40;
@@ -47,6 +48,7 @@
 			height = ylaenge * head[1] + 33 + head[1];
 			position = new ArrayList<Integer>(Arrays.asList(0, 0, 0, 1, 0, 2, 0, 3));
 			segmentdir = new ArrayList<Integer>(Arrays.asList(4, 44, 44, 4));
+			Image img = getToolkit().getImage("C:\\Users\\FreierP\\Pictures\\Camera Roll\\New_Super_Mario_Bros.jpg");
 			setseed();
 			setSize(width, height);
 			setTitle("Snake");
@@ -87,9 +89,8 @@
 
 		private void renderScene() {
 			Graphics graphics = strategy.getDrawGraphics();
-	//		graphics.setColor(Color.black);
-	//		graphics.fillRect(0, 0, width, height);
-			Image img = getToolkit().getImage("C:\\Users\\FreierP\\Pictures\\Camera Roll\\New_Super_Mario_Bros.jpg");
+			graphics.setColor(Color.black);
+			graphics.fillRect(0, 0, width, height);
 			graphics.drawImage(img,3,32,this);
 			renderBlinker(graphics);
 			renderSnake(graphics);

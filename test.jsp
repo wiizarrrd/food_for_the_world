@@ -41,7 +41,7 @@ boolean hello=!true ;
 </TABLE>
 <script language="javascript" type="text/javascript">
 function windowClose(){
-  var myWindow = window.open("spiel.jsp","","status").close();
+  var myWindow = window.open("spiel.jsp","","status,width=5,height=5").close();
 }
 </script>
 <button value="Open Window" onclick="windowClose()">Snake</button>
