@@ -1,4 +1,4 @@
-	<%@ page import=" java.awt.Color, java.awt.Frame, java.awt.Graphics, java.awt.Image,
+	<%@ page import=" java.awt.Color, java.awt.Frame, java.awt.Graphics,java.awt.image.BufferedImage,
 	 java.awt.Toolkit,
 	java.awt.event.KeyEvent,
 	 java.awt.event.KeyListener,
@@ -7,12 +7,16 @@
 	 java.awt.image.BufferStrategy,
 	java.util.ArrayList,
 	 java.util.Arrays,
+java.net.URL,
+
+javax.imageio.ImageIO,
 	 java.util.Random"%>
 	 <HTML>
  	<BODY>
 <%	class Snake_v001 extends Frame implements KeyListener {
 
 		private final BufferStrategy strategy;
+		private int[] insets;
 		private Random rand;
 		private int width = 1024, height = 512; // window settings
 		private int[] head;
@@ -29,7 +33,7 @@
 		private int idle;
 		private ArrayList<Integer> segmentdir;
 		private int[] endsegment;
-		private Image img;
+		private BufferedImage img;
 
 		public Snake_v001() {
 			idle = 40;
@@ -42,15 +46,15 @@
 			seed = new int[2];
 			endsegment = new int[] { 0, 3, 4, 1, 2 };
 			rand = new Random();
-			xlaenge = (width - 3) / head[0];
-			ylaenge = (height - 32) / head[1];
-			width = xlaenge * head[0] + head[0] + 3;
-			height = ylaenge * head[1] + 33 + head[1];
+
 			position = new ArrayList<Integer>(Arrays.asList(0, 0, 0, 1, 0, 2, 0, 3));
 			segmentdir = new ArrayList<Integer>(Arrays.asList(4, 44, 44, 4));
-			Image img = getToolkit().getImage("C:\\Users\\FreierP\\Pictures\\Camera Roll\\New_Super_Mario_Bros.jpg");
-			setseed();
-			setSize(width, height);
+			try {
+            URL url = new URL("http://localhost:8080/test/Bild.jpg");
+            img = ImageIO.read(url);
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
 			setTitle("Snake");
 			setResizable(false);
 			addWindowListener(new WindowAdapter() {
@@ -61,8 +65,20 @@
 			});
 			addKeyListener(this);
 			setVisible(true);
-			createBufferStrategy(2);
-			strategy = getBufferStrategy();
+			insets = new int[] { getInsets().top, getInsets().bottom, getInsets().left, getInsets().right };
+			System.out.println(getInsets().top+ getInsets().bottom+getInsets().left+getInsets().right);
+if(img!=null){
+	width=img.getWidth()-( insets[2]+insets[3]);
+	height=img.getHeight()-( insets[0]+insets[1]);
+}
+	createBufferStrategy(2);
+	strategy = getBufferStrategy();
+			xlaenge = width/head[0];
+			ylaenge = height/head[1];
+			width = ((xlaenge+1) * head[0]) + insets[2]+insets[3];
+			height =((ylaenge+1) * head[1]) + insets[0]+insets[1];
+			setSize(width, height);
+			setseed();
 		}
 
 		public void gameLoop() {
@@ -91,7 +107,7 @@
 			Graphics graphics = strategy.getDrawGraphics();
 			graphics.setColor(Color.black);
 			graphics.fillRect(0, 0, width, height);
-			graphics.drawImage(img,3,32,this);
+			graphics.drawImage(img,insets[2],insets[0],this);
 			renderBlinker(graphics);
 			renderSnake(graphics);
 			graphics.setColor(Color.WHITE);
@@ -106,103 +122,110 @@
 				graphics.setColor(Color.ORANGE);
 			else
 				graphics.setColor(Color.RED);
-			for (int i = 0; position.size() - 1 >= i; i += 2) {
+				for (int i = 0; position.size() - 1 >= i; i += 2) {
 				int richtung;
 
 				if (i == 0 || i == position.size() - 2) {
 					if (i == 0) {
 						richtung = segmentdir.get(i / 2);
 					} else
-						richtung = endsegment[segmentdir.get(i / 2)];
+						richtung = (segmentdir.get(i / 2) + 1) % 4 + 1;
 					switch (richtung) {
 					case 1:
-						graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32 + head[1] / 2,
-								head[0], head[1] / 2);
+						graphics.fillRect(position.get(i) * head[0] + insets[2],
+								position.get(i + 1) * head[1] + insets[0] + head[1] / 2, head[0], head[1] / 2);
 						break;
 					case 2:
-						graphics.fillRect(position.get(i) * head[0] + 3 + head[0] / 2, position.get(i + 1) * head[1] + 32,
-								head[0] / 2, head[1]);
+						graphics.fillRect(position.get(i) * head[0] + insets[2] + head[0] / 2,
+								position.get(i + 1) * head[1] + insets[0], head[0] / 2, head[1]);
 						break;
 					case 3:
-						graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0],
-								head[1] / 2);
+						graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0],
+								head[0], head[1] / 2);
 						break;
 					case 4:
-						graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0] / 2,
-								head[1]);
+						graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0],
+								head[0] / 2, head[1]);
 						break;
 					}
-					graphics.fillOval(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0], head[1]);
+					graphics.fillOval(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0],
+							head[0], head[1]);
 				} else
 					switch (segmentdir.get(i / 2)) {
 					case 11:
-						rect(graphics, i);
+						rect(graphics, i, true);
 						break;
 					case 12:
-						oval(graphics, i, 3);
+						oval(graphics, i, 3, true);
 						break;
 					case 14:
-						oval(graphics, i, 4);
+						oval(graphics, i, 4, true);
 						break;
 					case 21:
-						oval(graphics, i, 1);
+						oval(graphics, i, 1, true);
 						break;
 					case 22:
-						rect(graphics, i);
+						rect(graphics, i, true);
 						break;
 					case 23:
-						oval(graphics, i, 4);
+						oval(graphics, i, 4, true);
 						break;
 					case 32:
-						oval(graphics, i, 2);
+						oval(graphics, i, 2, true);
 						break;
 					case 33:
-						rect(graphics, i);
+						rect(graphics, i, true);
 						break;
 					case 34:
-						oval(graphics, i, 1);
+						oval(graphics, i, 1, true);
 						break;
 					case 41:
-						oval(graphics, i, 2);
+						oval(graphics, i, 2, true);
 						break;
 					case 43:
-						oval(graphics, i, 3);
+						oval(graphics, i, 3, true);
 						break;
 					case 44:
-						rect(graphics, i);
+						rect(graphics, i, true);
 						break;
 					}
 			}
 		}
 
-		private void oval(Graphics graphics, int i, int modus) {
-			graphics.fillOval(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0], head[1]);
+		private void oval(Graphics graphics, int i, int modus, boolean scf) {
+			graphics.fillOval(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0], head[0],
+					head[1]);
 			switch (modus) {
 			case 1:
-				graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0] / 2, head[1]);
-				graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32 + head[1] / 2, head[0],
-						head[1] / 2);
+				graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0],
+						head[0] / 2, head[1]);
+				graphics.fillRect(position.get(i) * head[0] + insets[2],
+						position.get(i + 1) * head[1] + insets[0] + head[1] / 2, head[0], head[1] / 2);
 				break;
 			case 2:
-				graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32 + head[0] / 2, head[0],
-						head[1] / 2);
-				graphics.fillRect(position.get(i) * head[0] + 3 + head[0] / 2, position.get(i + 1) * head[1] + 32,
-						head[0] / 2, head[1]);
+				graphics.fillRect(position.get(i) * head[0] + insets[2],
+						position.get(i + 1) * head[1] + insets[0] + head[0] / 2, head[0], head[1] / 2);
+				graphics.fillRect(position.get(i) * head[0] + insets[2] + head[0] / 2,
+						position.get(i + 1) * head[1] + insets[0], head[0] / 2, head[1]);
 				break;
 			case 3:
-				graphics.fillRect(position.get(i) * head[0] + 3 + head[0] / 2, position.get(i + 1) * head[1] + 32,
-						head[0] / 2, head[1]);
-				graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0], head[1]/2);
+				graphics.fillRect(position.get(i) * head[0] + insets[2] + head[0] / 2,
+						position.get(i + 1) * head[1] + insets[0], head[0] / 2, head[1]);
+				graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0], head[0],
+						head[1] / 2);
 				break;
 			case 4:
-				graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0], head[1]/2);
-				graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0] / 2, head[1]);
+				graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0], head[0],
+						head[1] / 2);
+				graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0],
+						head[0] / 2, head[1]);
 				break;
 			}
 		}
 
-		private void rect(Graphics graphics, int i) {
-			graphics.fillRect(position.get(i) * head[0] + 3, position.get(i + 1) * head[1] + 32, head[0], head[1]);
+		private void rect(Graphics graphics, int i, boolean scf) {
+			graphics.fillRect(position.get(i) * head[0] + insets[2], position.get(i + 1) * head[1] + insets[0], head[0],
+					head[1]);
 		}
 
 		private void renderBlinker(Graphics graphics) {
@@ -346,12 +369,18 @@
 		}
 
 		@Override
-		public void keyReleased(KeyEvent arg0) {
+		public void keyReleased(KeyEvent e) {
+			// TODO Auto-generated method stub
+
 		}
 
 		@Override
-		public void keyTyped(KeyEvent arg0) {
+		public void keyTyped(KeyEvent e) {
+			// TODO Auto-generated method stub
+
 		}
+
+
 
 	}%>
 </BODY>
