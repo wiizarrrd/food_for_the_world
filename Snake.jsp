@@ -1,18 +1,19 @@
-	<%@ page import=" java.awt.Color, java.awt.Frame, java.awt.Graphics,java.awt.image.BufferedImage,
-	 java.awt.Toolkit,
-	java.awt.event.KeyEvent,
-	 java.awt.event.KeyListener,
-	 java.awt.event.WindowAdapter,
-	 java.awt.event.WindowEvent,
-	 java.awt.image.BufferStrategy,
-	java.util.ArrayList,
-	 java.util.Arrays,
-java.net.URL,
+<%@ page import="java.awt.Color,
+		java.awt.Frame, java.awt.Graphics,
+		java.awt.image.BufferedImage,
+		java.awt.Toolkit,
+		java.awt.event.KeyEvent,
+		java.awt.event.KeyListener,
+		java.awt.event.WindowAdapter,
+	  java.awt.event.WindowEvent,
+	  java.awt.image.BufferStrategy,
+	  java.util.ArrayList,
+	  java.util.Arrays,
+		java.io.File,
+		javax.imageio.ImageIO,
+	 	java.util.Random" %>
 
-javax.imageio.ImageIO,
-	 java.util.Random"%>
-	 <HTML>
- 	<BODY>
+<!--		<%out.println(System.getProperty("user.dir"));%> -->
 <%	class Snake_v001 extends Frame implements KeyListener {
 
 		private final BufferStrategy strategy;
@@ -50,9 +51,8 @@ javax.imageio.ImageIO,
 			position = new ArrayList<Integer>(Arrays.asList(0, 0, 0, 1, 0, 2, 0, 3));
 			segmentdir = new ArrayList<Integer>(Arrays.asList(4, 44, 44, 4));
 			try {
-            URL url = new URL("http://localhost:8080/test/Bild.jpg");
-            img = ImageIO.read(url);
-        } catch (Exception e) {
+            img = ImageIO.read(new File("tomcat/webapps/test/Bild.jpg")); //System.getproperty(user.dir)+"/tomcat/webapps/test/Bild.jpg"
+        } catch (Exception e) {																						// or URL("http://localhost:8080/test/Bilg.jpg")
         	e.printStackTrace();
         }
 			setTitle("Snake");
@@ -60,23 +60,22 @@ javax.imageio.ImageIO,
 			addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
-					dispose();
+				gameover=true;
 				}
 			});
 			addKeyListener(this);
 			setVisible(true);
 			insets = new int[] { getInsets().top, getInsets().bottom, getInsets().left, getInsets().right };
-			System.out.println(getInsets().top+ getInsets().bottom+getInsets().left+getInsets().right);
-if(img!=null){
-	width=img.getWidth()-( insets[2]+insets[3]);
-	height=img.getHeight()-( insets[0]+insets[1]);
+			if(img!=null){
+					width=img.getWidth();
+					height=img.getHeight();
 }
 	createBufferStrategy(2);
 	strategy = getBufferStrategy();
 			xlaenge = width/head[0];
 			ylaenge = height/head[1];
-			width = ((xlaenge+1) * head[0]) + insets[2]+insets[3];
-			height =((ylaenge+1) * head[1]) + insets[0]+insets[1];
+			width = ((xlaenge) * head[0]) + insets[2]+insets[3];
+			height =((ylaenge) * head[1]) + insets[0]+insets[1];
 			setSize(width, height);
 			setseed();
 		}
@@ -234,9 +233,9 @@ if(img!=null){
 				blinker = 0;
 			blinker++;
 			if (blinker <= 500 / idle)
-				graphics.fillOval(seed[0] * head[0] + 3, seed[1] * head[1] + 32, head[0], head[1]);
+				graphics.fillOval(seed[0] * head[0]  + insets[2], seed[1] * head[1]+ insets[0], head[0], head[1]);
 			else if (blinker <= 1000 / idle)
-				graphics.fillOval((seed[0] * head[0] + 3) + head[0] / 4, (seed[1] * head[1] + 32) + head[1] / 4,
+				graphics.fillOval((seed[0] * head[0] + insets[2]) + head[0] / 4, (seed[1] * head[1] + insets[0]) + head[1] / 4,
 						head[0] / 2, head[1] / 2);
 
 		}
@@ -340,14 +339,14 @@ if(img!=null){
 		}
 
 		private void checkBorders() {
-			if (position.get(0) > xlaenge) {
+			if (position.get(0) >= xlaenge) {
 				position.set(0, 0);
 			} else if (position.get(0) < 0) {
-				position.set(0, xlaenge);
-			} else if (position.get(1) > ylaenge) {
+				position.set(0, xlaenge-1);
+			} else if (position.get(1) >= ylaenge) {
 				position.set(1, 0);
 			} else if (position.get(1) < 0) {
-				position.set(1, ylaenge);
+				position.set(1, ylaenge-1);
 			}
 		}
 
@@ -380,8 +379,4 @@ if(img!=null){
 
 		}
 
-
-
 	}%>
-</BODY>
-</HTML>
